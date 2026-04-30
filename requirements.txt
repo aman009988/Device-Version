@@ -1,0 +1,9 @@
+fastapi==0.115.6
+uvicorn[standard]==0.32.1
+sqlalchemy[asyncio]==2.0.36
+asyncpg==0.30.0
+redis[asyncio]==5.2.1
+aio-pika==9.5.0
+httpx==0.28.1
+cryptography==44.0.0
+python-dotenv==1.0.1

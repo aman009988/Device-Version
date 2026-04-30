@@ -1,0 +1,78 @@
+services:
+
+  # ── Producer: FastAPI HTTP server ─────────────────────────────────────────
+  producer:
+    build:
+      context: .
+      dockerfile: Dockerfile.producer
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./keys/public_third_key.pem:/app/keys/public_third_key.pem:ro
+    env_file:
+      - .env
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - internal
+
+  # ── Consumer: all workers in one process ─────────────────────────────────
+  consumer:
+    build:
+      context: .
+      dockerfile: Dockerfile.consumer
+    restart: unless-stopped
+    volumes:
+      - ./keys/public_third_key.pem:/app/keys/public_third_key.pem:ro
+    env_file:
+      - .env
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - internal
+
+  # # ── Redis ─────────────────────────────────────────────────────────────────
+  # redis:
+  #   image: redis:7-alpine
+  #   restart: unless-stopped
+  #   command: >
+  #     redis-server
+  #       --save ""
+  #       --appendonly no
+  #       --maxmemory 512mb
+  #       --maxmemory-policy allkeys-lru
+  #   ports:
+  #     - "6379:6379"
+  #   healthcheck:
+  #     test: ["CMD", "redis-cli", "ping"]
+  #     interval: 5s
+  #     timeout: 3s
+  #     retries: 5
+  #   networks:
+  #     - internal
+
+#   # ── RabbitMQ ──────────────────────────────────────────────────────────────
+#   rabbitmq:
+#     image: rabbitmq:3.13-management-alpine
+#     restart: unless-stopped
+#     env_file:
+#       - .env
+#     ports:
+#       - "5672:5672"
+#       - "15672:15672"    # management UI
+#     volumes:
+#       - rabbitmq_data:/var/lib/rabbitmq
+#     healthcheck:
+#       test: ["CMD", "rabbitmq-diagnostics", "ping"]
+#       interval: 10s
+#       timeout: 5s
+#       retries: 10
+#     networks:
+#       - internal
+
+networks:
+  internal:
+    driver: bridge
+
+

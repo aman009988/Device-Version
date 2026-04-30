@@ -1,0 +1,18 @@
+FROM python:3.12-slim
+
+WORKDIR /app
+
+# Install dependencies
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy source
+COPY . .
+
+# RSA key is mounted at runtime via volume (same key PHP uses)
+# Mount: ./keys/public_third_key.pem → /app/keys/public_third_key.pem
+
+EXPOSE 8000
+
+# Uvicorn: multiple workers to utilise all CPU cores for concurrent requests
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "4", "--loop", "uvloop"]
